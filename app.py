@@ -11,6 +11,8 @@ def load_model():
     with open("best_model_RandomForest.pkl", "rb") as f:
         return pickle.load(f)
 
+model = load_model() 
+
 # ========== HTML Template ==========
 html_temp = """<div style="background-color:#1f77b4;padding:10px;border-radius:10px">
                 <h1 style="color:white;text-align:center">🚗 Car Price Prediction App</h1> 

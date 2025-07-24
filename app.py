@@ -9,9 +9,9 @@ def load_model():
     with open("best_model_RandomForest.pkl", "rb") as f:
         return pickle.load(f)
 
-model = load_model()  # ✅ didefinisikan di global scope
+model = load_model()
 
-# ========== Homepage Layout ==========
+# ========== Header & Info ==========
 html_temp = """<div style="background-color:#000;padding:10px;border-radius:10px">
                 <h1 style="color:#fff;text-align:center">🚗 Car Price Prediction App</h1> 
                 <h4 style="color:#fff;text-align:center">Built with Random Forest Model</h4> 
@@ -24,6 +24,18 @@ This app allows users to input various car specifications and instantly receive 
 Kaggle: Car Price Prediction Dataset
 """
 
+# ========== Doors Category ==========
+def categorize_doors(door_value):
+    try:
+        if door_value <= 3:
+            return '2-3'
+        elif door_value <= 5:
+            return '4-5'
+        else:
+            return '>5'
+    except:
+        return 'Unknown'
+
 # ========== Main Function ==========
 def main():
     stc.html(html_temp)
@@ -35,10 +47,10 @@ def main():
         st.markdown(desc_temp, unsafe_allow_html=True)
 
     elif choice == "Predict Price":
-        run_ml_app()
+        run_prediction()
 
-# ========== Prediction App ==========
-def run_ml_app():
+# ========== Prediction Form ==========
+def run_prediction():
     st.subheader("🧠 Input Car Specifications")
 
     with st.form("prediction_form"):
@@ -54,49 +66,43 @@ def run_ml_app():
         drive_wheels = st.selectbox("Penggerak Roda", ['front', 'rear', '4x4'])
         leather = st.selectbox("Interior Kulit", ['Yes', 'No'])
         right_hand = st.selectbox("Setir Kanan", ['Yes', 'No'])
-
         doors = st.number_input("Jumlah Pintu", min_value=2, max_value=6, value=4)
 
         submitted = st.form_submit_button("🔍 Prediksi Harga")
 
     if submitted:
         try:
-            # Feature Engineering
+            # ========== Feature Engineering ==========
             volume_per_cylinder = engine_volume / cylinders
             fuel_gear = fuel_type + "_" + gearbox
             car_age = 2025 - prod_year
-
-            def categorize_doors(door_value):
-                if door_value <= 3:
-                    return '2-3'
-                elif door_value <= 5:
-                    return '4-5'
-                else:
-                    return '>5'
-
-            doors_category = categorize_doors(doors)
-
             leather_bin = 1 if leather == 'Yes' else 0
             right_hand_bin = 1 if right_hand == 'Yes' else 0
+            doors_category = categorize_doors(doors)
 
+            # ========== Build Input Data ==========
             input_df = pd.DataFrame({
                 'Prod. year': [prod_year],
                 'Engine volume': [engine_volume],
                 'Mileage': [mileage],
                 'Levy': [levy],
+                'Cylinders': [cylinders],
+                'Leather interior': [leather_bin],
+                'Right_hand_drive': [right_hand_bin],
+                'volume_per_cylinder': [volume_per_cylinder],
+                'car_age': [car_age],
                 'Manufacturer': [manufacturer],
                 'Fuel type': [fuel_type],
                 'Gear box type': [gearbox],
                 'Drive wheels': [drive_wheels],
-                'Leather interior': [leather_bin],
-                'Right_hand_drive': [right_hand_bin],
-                'Cylinders': [cylinders],
-                'volume_per_cylinder': [volume_per_cylinder],
                 'fuel_gear': [fuel_gear],
-                'car_age': [car_age],
                 'Doors_category': [doors_category]
             })
 
+            # Optional: Show input for debugging
+            # st.dataframe(input_df)
+
+            # ========== Predict ==========
             pred = model.predict(input_df)[0]
             st.success(f"💰 Prediksi Harga Mobil: **${pred:,.2f}**")
 

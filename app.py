@@ -3,14 +3,13 @@
 import streamlit as st
 import streamlit.components.v1 as stc
 import pandas as pd
-import joblib
+import pickle
 
 # ========== Load Model ==========
 @st.cache_resource
 def load_model():
-    return joblib.load("best_model_RandomForest.pkl")
-
-model = load_model()
+    with open("best_model_RandomForest.pkl", "rb") as f:
+        return pickle.load(f)
 
 # ========== HTML Template ==========
 html_temp = """<div style="background-color:#1f77b4;padding:10px;border-radius:10px">

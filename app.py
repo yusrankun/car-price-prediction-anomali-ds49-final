@@ -1,71 +1,53 @@
 import streamlit as st
 import pandas as pd
-import joblib  
+import joblib
+import streamlit.components.v1 as stc
 
 # ========== Load Model ==========
 @st.cache_resource
 def load_model():
-    return joblib.load("best_model_RandomForest.pkl")  # ✅ Ganti ini
+    model = joblib.load("best_model_RandomForest.pkl")
+    return model
 
+model = load_model()
 
-# ========== Homepage ==========
+# ========== Homepage Layout ==========
+html_temp = """
+<div style="background-color:#000;padding:10px;border-radius:10px">
+    <h1 style="color:#fff;text-align:center">🚗 Car Price Prediction App</h1> 
+    <h4 style="color:#fff;text-align:center">Built with Random Forest Model</h4> 
+</div>"""
+
+desc_temp = """
+### About This App  
+This app allows users to input various car specifications and instantly receive a predicted car price based on a trained model.
+
+#### Data Source
+Kaggle: Car Price Prediction Dataset
+"""
+
+# ========== Main Function ==========
 def main():
-    st.title("🚗 Car Price Prediction App")
-    st.markdown("Prediksi harga mobil berdasarkan spesifikasi yang Anda masukkan.")
-    
-    menu = ["Home", "Predict"]
+    stc.html(html_temp)
+    menu = ["Home", "Predict Price"]
     choice = st.sidebar.selectbox("Menu", menu)
 
     if choice == "Home":
-        st.subheader("Tentang Aplikasi")
-        st.markdown("""
-        Aplikasi ini menggunakan model **Random Forest** untuk memprediksi harga mobil berdasarkan berbagai fitur seperti tahun produksi, kapasitas mesin, jenis bahan bakar, transmisi, dan lainnya.  
-        Dataset berasal dari: **Car Price Prediction Dataset (Kaggle)**.
-        """)
-    else:
-        run_prediction()
+        st.subheader("🏠 Home")
+        st.markdown(desc_temp, unsafe_allow_html=True)
+    elif choice == "Predict Price":
+        run_ml_app()
 
-# ========== Preprocessing Function ==========
-def preprocess_input(data):
-    # Feature Engineering
-    data['volume_per_cylinder'] = data['Engine volume'] / data['Cylinders']
-    data['fuel_gear'] = data['Fuel type'] + "_" + data['Gear box type']
-    data['car_age'] = 2025 - data['Prod. year']
+# ========== Prediction App ==========
+def run_ml_app():
+    st.subheader("🧠 Input Car Specifications")
 
-    # Doors Category
-    def categorize_doors(val):
-        if val <= 3:
-            return '2-3'
-        elif val <= 5:
-            return '4-5'
-        else:
-            return '>5'
-    
-    data['Doors_category'] = data['Doors'].apply(categorize_doors)
-
-    # Binary Encoding
-    data['Leather interior'] = data['Leather interior'].map({'Yes': 1, 'No': 0})
-    data['Right_hand_drive'] = data['Right_hand_drive'].map({'Yes': 1, 'No': 0})
-
-    # Final selected features (same as Colab)
-    selected_features = ['Prod. year', 'Engine volume', 'Mileage', 'Levy', 'Cylinders',
-                         'volume_per_cylinder', 'Fuel type', 'Gear box type',
-                         'Drive wheels', 'Leather interior', 'Right_hand_drive',
-                         'Manufacturer', 'fuel_gear', 'car_age', 'Doors_category']
-    
-    return data[selected_features]
-
-# ========== Prediction Page ==========
-def run_prediction():
-    st.subheader("🧠 Masukkan Spesifikasi Mobil Anda")
-
-    with st.form("input_form"):
-        prod_year = st.number_input("Tahun Produksi", 1990, 2025, 2015)
-        engine_volume = st.number_input("Volume Mesin (L)", 0.5, 10.0, step=0.1, value=2.0)
-        mileage = st.number_input("Jarak Tempuh (km)", 0, 1_000_000, step=1000, value=150_000)
-        levy = st.number_input("Levy", 0, 50000, step=100, value=0)
-        cylinders = st.number_input("Jumlah Silinder", 1, 16, value=4)
-        doors = st.number_input("Jumlah Pintu", 2, 6, value=4)
+    with st.form("prediction_form"):
+        prod_year = st.number_input("Tahun Produksi", min_value=1990, max_value=2025, value=2015)
+        engine_volume = st.number_input("Volume Mesin (L)", min_value=0.5, max_value=10.0, step=0.1, value=2.0)
+        mileage = st.number_input("Jarak Tempuh (km)", min_value=0, max_value=1_000_000, step=1000, value=150_000)
+        levy = st.number_input("Levy", min_value=0, max_value=50000, step=100, value=0)
+        cylinders = st.number_input("Jumlah Silinder", min_value=1, max_value=16, value=4)
 
         manufacturer = st.selectbox("Merek", ['Toyota', 'BMW', 'Mercedes-Benz', 'Hyundai', 'Rare'])
         fuel_type = st.selectbox("Tipe Bahan Bakar", ['Petrol', 'Diesel', 'Hybrid', 'Electric'])
@@ -74,33 +56,36 @@ def run_prediction():
         leather = st.selectbox("Interior Kulit", ['Yes', 'No'])
         right_hand = st.selectbox("Setir Kanan", ['Yes', 'No'])
 
+        doors = st.number_input("Jumlah Pintu", min_value=2, max_value=6, value=4)
+
         submitted = st.form_submit_button("🔍 Prediksi Harga")
 
     if submitted:
         try:
-            input_dict = {
+            # Feature Engineering
+            volume_per_cylinder = engine_volume / cylinders
+            fuel_gear = fuel_type + "_" + gearbox
+            car_age = 2025 - prod_year
+
+            def categorize_doors(door_value):
+                if door_value <= 3:
+                    return '2-3'
+                elif door_value <= 5:
+                    return '4-5'
+                else:
+                    return '>5'
+
+            doors_category = categorize_doors(doors)
+            leather_bin = 1 if leather == 'Yes' else 0
+            right_hand_bin = 1 if right_hand == 'Yes' else 0
+
+            input_df = pd.DataFrame({
                 'Prod. year': [prod_year],
                 'Engine volume': [engine_volume],
                 'Mileage': [mileage],
                 'Levy': [levy],
-                'Cylinders': [cylinders],
+                'Manufacturer': [manufacturer],
                 'Fuel type': [fuel_type],
                 'Gear box type': [gearbox],
                 'Drive wheels': [drive_wheels],
-                'Leather interior': [leather],
-                'Right_hand_drive': [right_hand],
-                'Manufacturer': [manufacturer],
-                'Doors': [doors]
-            }
-
-            input_df = pd.DataFrame(input_dict)
-            processed_df = preprocess_input(input_df)
-
-            pred = model.predict(processed_df)[0]
-            st.success(f"💰 Estimasi Harga Mobil Anda: **${pred:,.2f}**")
-        except Exception as e:
-            st.error(f"Terjadi kesalahan saat prediksi: {e}")
-
-# ========== Run App ==========
-if __name__ == "__main__":
-    main()
+                'Leather interior': [leather_bin],

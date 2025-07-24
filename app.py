@@ -1,14 +1,12 @@
 import streamlit as st
 import pandas as pd
-import pickle
+import joblib  
 
 # ========== Load Model ==========
 @st.cache_resource
 def load_model():
-    with open("best_model_RandomForest.pkl", "rb") as f:
-        return pickle.load(f)
+    return joblib.load("best_model_RandomForest.pkl")  # ✅ Ganti ini
 
-model = load_model()
 
 # ========== Homepage ==========
 def main():

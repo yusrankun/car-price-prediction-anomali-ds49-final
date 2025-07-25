@@ -25,12 +25,12 @@ html_temp = """
 """
 
 desc_temp = """
-### Tentang Aplikasi  
-Aplikasi ini memungkinkan Anda memasukkan spesifikasi mobil dan mendapatkan prediksi harga secara instan berdasarkan model yang telah dilatih.
+### 🧾 Tentang Aplikasi
+Aplikasi ini memungkinkan Anda untuk memasukkan berbagai spesifikasi mobil dan langsung memperoleh prediksi harga berdasarkan model pembelajaran mesin yang telah dilatih.
 
-#### Sumber Data  
-Kaggle - *Car Price Prediction Dataset*  
-Model yang digunakan: Random Forest (hasil tuning)
+#### 📊 Sumber Data
+Dataset: *Car Price Prediction* dari [Kaggle](https://www.kaggle.com/datasets/deepcontractor/car-price-prediction-challenge)  
+Model: **Random Forest** yang telah dituning untuk performa optimal.
 """
 
 # ========== Fungsi Utama ========== #

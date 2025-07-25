@@ -8,7 +8,7 @@ import streamlit.components.v1 as stc
 def load_model():
     return joblib.load("best_model_RandomForest.pkl")
 
-model = load_model()
+
 
 # ========== Homepage Layout ========== #
 html_temp = """

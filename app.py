@@ -1,13 +1,13 @@
 import streamlit as st
 import pandas as pd
-import joblib
+import cloudpickle
 import streamlit.components.v1 as stc
 
 # ========== Load Model ==========
 @st.cache_resource
 def load_model():
-    model = joblib.load("best_model_RandomForest.pkl")
-    return model
+    with open("best_model_RandomForest.pkl", "rb") as f:
+        return cloudpickle.load(f)
 
 model = load_model()
 

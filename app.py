@@ -6,9 +6,15 @@ import streamlit.components.v1 as stc
 # ========== Load Model ========== #
 @st.cache_resource
 def load_model():
-    return joblib.load("best_model_RandomForest.pkl")
-
-
+    try:
+        model = joblib.load("best_model_RandomForest.pkl")
+        st.success("✅ Model loaded successfully!")
+        return model
+    except Exception as e:
+        st.error(f"❌ Failed to load model: {e}")
+        return None
+        
+model = load_model()
 
 # ========== Homepage Layout ========== #
 html_temp = """

@@ -3,54 +3,54 @@ import pandas as pd
 import joblib
 import streamlit.components.v1 as stc
 
-# ========== Load Model ========== #
+# ========== Memuat Model ========== #
 @st.cache_resource
 def load_model():
     try:
         model = joblib.load("best_model_RandomForest.pkl")
-        st.success("✅ Model loaded successfully!")
+        st.success("✅ Model berhasil dimuat!")
         return model
     except Exception as e:
-        st.error(f"❌ Failed to load model: {e}")
+        st.error(f"❌ Gagal memuat model: {e}")
         return None
-        
+
 model = load_model()
 
-# ========== Homepage Layout ========== #
+# ========== Tampilan Utama ========== #
 html_temp = """
 <div style="background-color:#000;padding:10px;border-radius:10px">
-    <h1 style="color:#fff;text-align:center">🚗 Car Price Prediction App</h1> 
-    <h4 style="color:#fff;text-align:center">Built with Random Forest Model</h4> 
+    <h1 style="color:#fff;text-align:center">🚗 Aplikasi Prediksi Harga Mobil</h1> 
+    <h4 style="color:#fff;text-align:center">Dibangun dengan Model Random Forest</h4> 
 </div>
 """
 
 desc_temp = """
-### About This App  
-This app allows users to input various car specifications and instantly receive a predicted car price based on a trained model.
+### Tentang Aplikasi Ini  
+Aplikasi ini memungkinkan pengguna untuk memasukkan berbagai spesifikasi mobil dan langsung menerima prediksi harga mobil berdasarkan model yang telah dilatih.
 
-#### Data Source
+#### Sumber Data
 Kaggle: Car Price Prediction Dataset  
-Model: Tuned Random Forest Regressor
+Model: Random Forest Regressor yang sudah dituning
 """
 
-# ========== Main Function ========== #
+# ========== Fungsi Utama ========== #
 def main():
     stc.html(html_temp)
-    menu = ["Home", "Predict Price"]
+    menu = ["Beranda", "Prediksi Harga"]
     choice = st.sidebar.selectbox("📋 Menu", menu)
 
-    if choice == "Home":
-        st.subheader("🏠 Home")
+    if choice == "Beranda":
+        st.subheader("🏠 Beranda")
         st.markdown(desc_temp, unsafe_allow_html=True)
 
-    elif choice == "Predict Price":
-        run_ml_app()
+    elif choice == "Prediksi Harga":
+        jalankan_aplikasi_prediksi()
 
-# ========== Prediction App ========== #
-def run_ml_app():
-    st.subheader("Input Car Specifications")
+# ========== Aplikasi Prediksi ========== #
+def jalankan_aplikasi_prediksi():
+    st.subheader("Masukkan Spesifikasi Mobil")
 
-    with st.form("prediction_form"):
+    with st.form("form_prediksi"):
         prod_year = st.number_input("Tahun Produksi", min_value=1990, max_value=2025, value=2015)
         engine_volume = st.number_input("Volume Mesin (L)", min_value=0.5, max_value=10.0, step=0.1, value=2.0)
         mileage = st.number_input("Jarak Tempuh (km)", min_value=0, max_value=1_000_000, step=1000, value=150_000)
@@ -69,20 +69,20 @@ def run_ml_app():
 
     if submitted:
         try:
-            # Feature Engineering
+            # Rekayasa Fitur
             volume_per_cylinder = engine_volume / cylinders
             fuel_gear = fuel_type + "_" + gearbox
             car_age = 2025 - prod_year
 
-            def categorize_doors(door_value):
-                if door_value <= 3:
+            def kategorikan_pintu(jumlah_pintu):
+                if jumlah_pintu <= 3:
                     return '2-3'
-                elif door_value <= 5:
+                elif jumlah_pintu <= 5:
                     return '4-5'
                 else:
                     return '>5'
 
-            doors_category = categorize_doors(doors)
+            doors_category = kategorikan_pintu(doors)
             leather_bin = 1 if leather == 'Yes' else 0
             right_hand_bin = 1 if right_hand == 'Yes' else 0
 
@@ -104,13 +104,13 @@ def run_ml_app():
                 'Doors_category': [doors_category]
             })
 
-            # Prediction
+            # Prediksi
             prediction = model.predict(input_df)[0]
             st.success(f"💰 Prediksi Harga Mobil: **${prediction:,.2f}**")
 
         except Exception as e:
-            st.error(f"❌ Error saat prediksi: {e}")
+            st.error(f"❌ Terjadi kesalahan saat prediksi: {e}")
 
-# ========== Run App ========== #
+# ========== Menjalankan Aplikasi ========== #
 if __name__ == '__main__':
     main()

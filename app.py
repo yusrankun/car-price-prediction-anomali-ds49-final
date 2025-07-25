@@ -42,7 +42,7 @@ def main():
 
 # ========== Prediction App ========== #
 def run_ml_app():
-    st.subheader("🧠 Input Car Specifications")
+    st.subheader("Input Car Specifications")
 
     with st.form("prediction_form"):
         prod_year = st.number_input("Tahun Produksi", min_value=1990, max_value=2025, value=2015)

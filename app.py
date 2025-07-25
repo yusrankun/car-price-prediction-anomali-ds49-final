@@ -89,3 +89,20 @@ def run_ml_app():
                 'Gear box type': [gearbox],
                 'Drive wheels': [drive_wheels],
                 'Leather interior': [leather_bin],
+                'Right_hand_drive': [right_hand_bin],
+                'Cylinders': [cylinders],
+                'volume_per_cylinder': [volume_per_cylinder],
+                'fuel_gear': [fuel_gear],
+                'car_age': [car_age],
+                'Doors_category': [doors_category]
+            })
+
+            pred = model.predict(input_df)[0]
+            st.success(f"💰 Prediksi Harga Mobil: **${pred:,.2f}**")
+
+        except Exception as e:
+            st.error(f"❌ Error saat prediksi: {e}")
+
+# ========== Run App ==========
+if __name__ == '__main__':
+    main()

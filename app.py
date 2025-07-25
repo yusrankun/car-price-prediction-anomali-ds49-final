@@ -3,41 +3,44 @@ import pandas as pd
 import joblib
 import streamlit.components.v1 as stc
 
-# ========== Load Model ==========
+# ========== Load Model ========== #
 @st.cache_resource
 def load_model():
     return joblib.load("best_model_RandomForest.pkl")
 
 model = load_model()
 
-# ========== Homepage Layout ==========
+# ========== Homepage Layout ========== #
 html_temp = """
 <div style="background-color:#000;padding:10px;border-radius:10px">
     <h1 style="color:#fff;text-align:center">🚗 Car Price Prediction App</h1> 
     <h4 style="color:#fff;text-align:center">Built with Random Forest Model</h4> 
-</div>"""
+</div>
+"""
 
 desc_temp = """
 ### About This App  
 This app allows users to input various car specifications and instantly receive a predicted car price based on a trained model.
 
 #### Data Source
-Kaggle: Car Price Prediction Dataset
+Kaggle: Car Price Prediction Dataset  
+Model: Tuned Random Forest Regressor
 """
 
-# ========== Main Function ==========
+# ========== Main Function ========== #
 def main():
     stc.html(html_temp)
     menu = ["Home", "Predict Price"]
-    choice = st.sidebar.selectbox("Menu", menu)
+    choice = st.sidebar.selectbox("📋 Menu", menu)
 
     if choice == "Home":
         st.subheader("🏠 Home")
         st.markdown(desc_temp, unsafe_allow_html=True)
+
     elif choice == "Predict Price":
         run_ml_app()
 
-# ========== Prediction App ==========
+# ========== Prediction App ========== #
 def run_ml_app():
     st.subheader("🧠 Input Car Specifications")
 
@@ -102,6 +105,6 @@ def run_ml_app():
         except Exception as e:
             st.error(f"❌ Error saat prediksi: {e}")
 
-# ========== Run App ==========
+# ========== Run App ========== #
 if __name__ == '__main__':
     main()

@@ -3,7 +3,7 @@ import pandas as pd
 import joblib
 import streamlit.components.v1 as stc
 
-# ========== Memuat Model ========== #
+# ========== Load Model ========== #
 @st.cache_resource
 def load_model():
     try:
@@ -16,56 +16,56 @@ def load_model():
 
 model = load_model()
 
-# ========== Tampilan Utama ========== #
+# ========== HTML Template ========== #
 html_temp = """
-<div style="background-color:#000;padding:10px;border-radius:10px">
-    <h1 style="color:#fff;text-align:center">🚗 Aplikasi Prediksi Harga Mobil</h1> 
-    <h4 style="color:#fff;text-align:center">Dibangun dengan Model Random Forest</h4> 
+<div style="padding:10px;border-radius:10px; background-color:rgba(0,0,0,0.8)">
+    <h1 style="color:white;text-align:center;">🚗 Aplikasi Prediksi Harga Mobil</h1> 
+    <h4 style="color:white;text-align:center;">Model: Random Forest Regressor</h4> 
 </div>
 """
 
 desc_temp = """
-### Tentang Aplikasi Ini  
-Aplikasi ini memungkinkan pengguna untuk memasukkan berbagai spesifikasi mobil dan langsung menerima prediksi harga mobil berdasarkan model yang telah dilatih.
+### Tentang Aplikasi  
+Aplikasi ini memungkinkan Anda memasukkan spesifikasi mobil dan mendapatkan prediksi harga secara instan berdasarkan model yang telah dilatih.
 
-#### Sumber Data
-Kaggle: Car Price Prediction Dataset  
-Model: Random Forest Regressor yang sudah dituning
+#### Sumber Data  
+Kaggle - *Car Price Prediction Dataset*  
+Model yang digunakan: Random Forest (hasil tuning)
 """
 
 # ========== Fungsi Utama ========== #
 def main():
     stc.html(html_temp)
     menu = ["Beranda", "Prediksi Harga"]
-    choice = st.sidebar.selectbox("📋 Menu", menu)
+    choice = st.sidebar.selectbox("📋 Menu Navigasi", menu)
 
     if choice == "Beranda":
         st.subheader("🏠 Beranda")
         st.markdown(desc_temp, unsafe_allow_html=True)
 
     elif choice == "Prediksi Harga":
-        jalankan_aplikasi_prediksi()
+        run_ml_app()
 
-# ========== Aplikasi Prediksi ========== #
-def jalankan_aplikasi_prediksi():
-    st.subheader("Masukkan Spesifikasi Mobil")
+# ========== Fungsi Prediksi ========== #
+def run_ml_app():
+    st.subheader("🧠 Masukkan Spesifikasi Mobil")
 
-    with st.form("form_prediksi"):
+    with st.form("prediction_form"):
         prod_year = st.number_input("Tahun Produksi", min_value=1990, max_value=2025, value=2015)
         engine_volume = st.number_input("Volume Mesin (L)", min_value=0.5, max_value=10.0, step=0.1, value=2.0)
         mileage = st.number_input("Jarak Tempuh (km)", min_value=0, max_value=1_000_000, step=1000, value=150_000)
-        levy = st.number_input("Levy", min_value=0, max_value=50000, step=100, value=0)
+        levy = st.number_input("Levy (Pajak)", min_value=0, max_value=50000, step=100, value=0)
         cylinders = st.number_input("Jumlah Silinder", min_value=1, max_value=16, value=4)
 
-        manufacturer = st.selectbox("Merek", ['Toyota', 'BMW', 'Mercedes-Benz', 'Hyundai', 'Rare'])
-        fuel_type = st.selectbox("Tipe Bahan Bakar", ['Petrol', 'Diesel', 'Hybrid', 'Electric'])
+        manufacturer = st.selectbox("Merek Mobil", ['Toyota', 'BMW', 'Mercedes-Benz', 'Hyundai', 'Rare'])
+        fuel_type = st.selectbox("Jenis Bahan Bakar", ['Petrol', 'Diesel', 'Hybrid', 'Electric'])
         gearbox = st.selectbox("Transmisi", ['Automatic', 'Manual'])
         drive_wheels = st.selectbox("Penggerak Roda", ['front', 'rear', '4x4'])
-        leather = st.selectbox("Interior Kulit", ['Yes', 'No'])
-        right_hand = st.selectbox("Setir Kanan", ['Yes', 'No'])
+        leather = st.selectbox("Interior Kulit?", ['Ya', 'Tidak'])
+        right_hand = st.selectbox("Setir Kanan?", ['Ya', 'Tidak'])
         doors = st.number_input("Jumlah Pintu", min_value=2, max_value=6, value=4)
 
-        submitted = st.form_submit_button("🔍 Prediksi Harga")
+        submitted = st.form_submit_button("🔍 Prediksi")
 
     if submitted:
         try:
@@ -74,17 +74,17 @@ def jalankan_aplikasi_prediksi():
             fuel_gear = fuel_type + "_" + gearbox
             car_age = 2025 - prod_year
 
-            def kategorikan_pintu(jumlah_pintu):
-                if jumlah_pintu <= 3:
+            def categorize_doors(door_value):
+                if door_value <= 3:
                     return '2-3'
-                elif jumlah_pintu <= 5:
+                elif door_value <= 5:
                     return '4-5'
                 else:
                     return '>5'
 
-            doors_category = kategorikan_pintu(doors)
-            leather_bin = 1 if leather == 'Yes' else 0
-            right_hand_bin = 1 if right_hand == 'Yes' else 0
+            doors_category = categorize_doors(doors)
+            leather_bin = 1 if leather == 'Ya' else 0
+            right_hand_bin = 1 if right_hand == 'Ya' else 0
 
             input_df = pd.DataFrame({
                 'Prod. year': [prod_year],
@@ -104,13 +104,13 @@ def jalankan_aplikasi_prediksi():
                 'Doors_category': [doors_category]
             })
 
-            # Prediksi
+            # Prediksi Harga
             prediction = model.predict(input_df)[0]
-            st.success(f"💰 Prediksi Harga Mobil: **${prediction:,.2f}**")
+            st.success(f"💰 Estimasi Harga Mobil: **${prediction:,.2f}**")
 
         except Exception as e:
             st.error(f"❌ Terjadi kesalahan saat prediksi: {e}")
 
-# ========== Menjalankan Aplikasi ========== #
+# ========== Jalankan Aplikasi ========== #
 if __name__ == '__main__':
     main()

@@ -7,7 +7,7 @@ import streamlit.components.v1 as stc
 @st.cache_resource
 def load_model():
     try:
-        model = joblib.load("best_model_RandomForest_compatible.pkl")
+        model = joblib.load("best_model_RandomForest.pkl")
         st.success("✅ Model loaded successfully!")
         return model
     except Exception as e:
